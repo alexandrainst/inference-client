@@ -1,20 +1,61 @@
+import os
 from typing import Optional
+
+import ollama
+from ollama import Client
 
 from inference_client.base.provider import BaseProvider
 from inference_client.base.types import InferenceRequest, InferenceResponse
+from inference_client.exceptions import (
+    ConfigurationError,
+    InferenceRequestError,
+    InferenceTimeoutError,
+)
 
 
 class OllamaProvider(BaseProvider):
     """
     Ollama inference provider implementation.
+
+    Provides local AI inference through Ollama with support for chat-based
+    interactions and model management.
     """
 
-    def __init__(self, host: str, api_key: Optional[str] = None):
+    def __init__(
+        self,
+        host: str = "http://localhost:11434",
+        api_key: Optional[str] = None,
+        timeout: int = 30,
+    ):
         super().__init__()
 
+        # The Ollama Python library reads the api_key from environment variables,
+        # if we get an api_key, we set it here.
+        if api_key:
+            os.environ["OLLAMA_API_KEY"] = api_key
+
         self.host = host
-        self.api_key = api_key
-        # Initialize Ollama client here with the provided host and optional API key
+        self.timeout = timeout
+
+        # Validate configuration
+        self._validate_configuration()
+
+        # Initialize Ollama clients
+        try:
+            self._client = Client(host=self.host)
+        except Exception as e:
+            raise ConfigurationError(f"Failed to initialize Ollama client: {str(e)}")
+
+    def _validate_configuration(self) -> None:
+        """Validate configuration parameters."""
+        if not isinstance(self.host, str) or not self.host.strip():
+            raise ConfigurationError("Host must be a non-empty string")
+
+        if not self.host.startswith(("http://", "https://")):
+            raise ConfigurationError("Host must start with http:// or https://")
+
+        if not isinstance(self.timeout, int) or self.timeout <= 0:
+            raise ConfigurationError("Timeout must be a positive integer")
 
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         """
@@ -28,8 +69,103 @@ class OllamaProvider(BaseProvider):
 
         :raises ConfigurationError: If there is a configuration issue with the Ollama provider.
         :raises InferenceRequestError: If there is an error with the inference request.
-        :raises InferenceResponseError: If there is an error with the inference response.
+        :raises InferenceTimeoutError: If the request times out.
         """
-        # Implement the logic to call Ollama's API with the request data
-        # and return an InferenceResponse object.
-        pass
+        # Validate request
+        if not request.model:
+            raise InferenceRequestError("Model name is required")
+
+        if not request.message:
+            raise InferenceRequestError("Message is required")
+
+        try:
+            # Build chat messages for Ollama
+            messages = []
+
+            # Add context messages if provided (multi-turn conversation)
+            if request.context:
+                for i, context_msg in enumerate(request.context):
+                    # Alternate between user and assistant messages
+                    role = "user" if i % 2 == 0 else "assistant"
+                    messages.append({"role": role, "content": context_msg})
+
+            # Add current message
+            messages.append({"role": "user", "content": request.message})
+
+            # Make the chat request
+            response = self._client.chat(
+                model=request.model,
+                messages=messages,
+                options={"timeout": self.timeout},
+            )
+
+            if not response or "message" not in response:
+                raise InferenceRequestError("Invalid response from Ollama service")
+
+            assistant_message = response["message"].get("content", "")
+
+            if not assistant_message:
+                raise InferenceRequestError("Empty response from Ollama service")
+
+            return InferenceResponse(message=assistant_message)
+
+        except ollama.ResponseError as e:
+            if "model" in str(e).lower() and "not found" in str(e).lower():
+                raise InferenceRequestError(
+                    f"Model '{request.model}' not found. "
+                    f"Please pull the model using: ollama pull {request.model}"
+                )
+            else:
+                raise InferenceRequestError(f"Ollama service error: {str(e)}")
+
+        except Exception as e:
+            if "timeout" in str(e).lower():
+                raise InferenceTimeoutError(
+                    f"Request timed out after {self.timeout} seconds. "
+                    f"Consider increasing timeout or using a smaller model."
+                )
+            else:
+                raise InferenceRequestError(
+                    f"Unexpected error during prediction: {str(e)}"
+                )
+
+    def supported_models(self) -> list[str]:
+        """
+        Return a list of supported model names by the Ollama provider.
+
+        :return: A list of supported model names.
+        :rtype: list[str]
+
+        :raises InferenceRequestError: If unable to retrieve models from Ollama service.
+        """
+        try:
+            # Get list of models from Ollama
+            models_response = self._client.list()
+
+            if not models_response or "models" not in models_response:
+                raise InferenceRequestError(
+                    "Invalid response when fetching models from Ollama"
+                )
+
+            # Extract model names
+            model_names = []
+            for model in models_response["models"]:
+                if "name" in model:
+                    model_names.append(model["name"])
+
+            if not model_names:
+                raise InferenceRequestError(
+                    "No models available in Ollama. "
+                    "Please pull at least one model using: ollama pull <model-name>"
+                )
+
+            return model_names
+
+        except Exception as e:
+            if isinstance(e, InferenceRequestError):
+                raise
+            else:
+                raise InferenceRequestError(
+                    f"Failed to retrieve supported models: {str(e)}. "
+                    f"Please ensure Ollama service is running at {self.host}"
+                )

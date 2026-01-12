@@ -23,3 +23,10 @@ class ConfigurationError(InferenceClientError):
 
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class InferenceTimeoutError(InferenceClientError):
+    """Exception raised for inference request timeouts."""
+
+    def __init__(self, message: str):
+        super().__init__(message)

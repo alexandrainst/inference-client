@@ -11,7 +11,21 @@ class BaseProvider:
     """
 
     def __init__(self):
-        pass
+        self._models: list[str] = []
+
+    @property
+    def models(self) -> list[str]:
+        """
+        Get the list of supported models by this provider.
+
+        Returns:
+            A list of supported model names.
+        Raises:
+            InferenceRequestError: If there is an error retrieving the supported models.
+        """
+        if not self._models:
+            self._models = self.supported_models()
+        return self._models
 
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         """
@@ -36,5 +50,22 @@ class BaseProvider:
             ConfigurationError: If there is a configuration issue with the underlying provider.
             InferenceRequestError: If there is an error with the inference request.
             InferenceResponseError: If there is an error with the inference response.
+        """
+        raise NotImplementedError("Subclasses must implement this method.")
+
+    def supported_models(self) -> list[str]:
+        """
+        Return a list of supported model names by this provider.
+
+        This method must be implemented by subclasses to provide
+        specific information about the models they support. Models
+        must be stored in the `_models` attribute.
+
+        Returns:
+            A list of supported model names.
+
+        Raises:
+            NotImplementedError: If the method is not implemented by a subclass.
+            InferenceRequestError: If there is an error retrieving the supported models.
         """
         raise NotImplementedError("Subclasses must implement this method.")
