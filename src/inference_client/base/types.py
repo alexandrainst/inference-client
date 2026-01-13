@@ -38,7 +38,7 @@ class InferenceResponse:
         return bool(self.message or self.images)
 
 
-class Role(str, Enum):
+class Role(Enum):
     """Valid roles for context messages."""
 
     USER = "user"
