@@ -4,7 +4,11 @@ from unittest.mock import Mock, patch
 import ollama
 import pytest
 
-from inference_client.base.types import InferenceRequest, InferenceResponse
+from inference_client.base.types import (
+    ContextMessage,
+    InferenceRequest,
+    InferenceResponse,
+)
 from inference_client.exceptions import (
     ConfigurationError,
     InferenceRequestError,
@@ -102,8 +106,12 @@ class TestOllamaProvider:
             model="llama2:7b",
             message="What about Python?",
             context=[
-                "What's a good programming language?",
-                "JavaScript is good for web development",
+                ContextMessage(
+                    role="user", content="What's a good programming language?"
+                ),
+                ContextMessage(
+                    role="assistant", content="JavaScript is good for web development"
+                ),
             ],
         )
 
@@ -121,6 +129,80 @@ class TestOllamaProvider:
             model="llama2:7b", messages=expected_messages, options={"timeout": 30}
         )
         assert response.message == "Python is great for data science!"
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_with_consecutive_user_messages(self, mock_client_class):
+        """Test prediction with consecutive user messages (agent mode scenario)."""
+        # Setup
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {
+            "message": {"content": "I'll help you with both requests."}
+        }
+
+        provider = OllamaProvider()
+        request = InferenceRequest(
+            model="llama2:7b",
+            message="And also explain generators",
+            context=[
+                ContextMessage(role="user", content="Explain Python decorators"),
+                ContextMessage(role="user", content="Actually, wait"),
+            ],
+        )
+
+        # Execute
+        response = provider.predict(request)
+
+        # Verify - consecutive user messages are preserved
+        expected_messages = [
+            {"role": "user", "content": "Explain Python decorators"},
+            {"role": "user", "content": "Actually, wait"},
+            {"role": "user", "content": "And also explain generators"},
+        ]
+
+        mock_client.chat.assert_called_once_with(
+            model="llama2:7b", messages=expected_messages, options={"timeout": 30}
+        )
+        assert response.message == "I'll help you with both requests."
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_with_consecutive_assistant_messages(self, mock_client_class):
+        """Test prediction with consecutive assistant messages (agent mode scenario)."""
+        # Setup
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {
+            "message": {"content": "Sure, I can continue helping."}
+        }
+
+        provider = OllamaProvider()
+        request = InferenceRequest(
+            model="llama2:7b",
+            message="Continue",
+            context=[
+                ContextMessage(role="user", content="Help me debug this"),
+                ContextMessage(role="assistant", content="Let me check the code..."),
+                ContextMessage(role="assistant", content="I found the issue!"),
+            ],
+        )
+
+        # Execute
+        response = provider.predict(request)
+
+        # Verify - consecutive assistant messages are preserved
+        expected_messages = [
+            {"role": "user", "content": "Help me debug this"},
+            {"role": "assistant", "content": "Let me check the code..."},
+            {"role": "assistant", "content": "I found the issue!"},
+            {"role": "user", "content": "Continue"},
+        ]
+
+        mock_client.chat.assert_called_once_with(
+            model="llama2:7b", messages=expected_messages, options={"timeout": 30}
+        )
+        assert response.message == "Sure, I can continue helping."
 
     @patch("inference_client.providers.ollama.ollama_provider.Client")
     def test_predict_empty_model(self, mock_client_class):

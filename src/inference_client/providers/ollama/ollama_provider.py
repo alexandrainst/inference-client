@@ -84,10 +84,10 @@ class OllamaProvider(BaseProvider):
 
             # Add context messages if provided (multi-turn conversation)
             if request.context:
-                for i, context_msg in enumerate(request.context):
-                    # Alternate between user and assistant messages
-                    role = "user" if i % 2 == 0 else "assistant"
-                    messages.append({"role": role, "content": context_msg})
+                for context_msg in request.context:
+                    messages.append(
+                        {"role": context_msg.role, "content": context_msg.content}
+                    )
 
             # Add current message
             messages.append({"role": "user", "content": request.message})
