@@ -5,7 +5,7 @@ import ollama
 from ollama import Client
 
 from inference_client.base.provider import BaseProvider
-from inference_client.base.types import InferenceRequest, InferenceResponse
+from inference_client.base.types import InferenceRequest, InferenceResponse, Role
 from inference_client.exceptions import (
     ConfigurationError,
     InferenceRequestError,
@@ -90,7 +90,7 @@ class OllamaProvider(BaseProvider):
                     )
 
             # Add current message
-            messages.append({"role": "user", "content": request.message})
+            messages.append({"role": Role.USER, "content": request.message})
 
             # Make the chat request
             response = self._client.chat(

@@ -8,6 +8,7 @@ from inference_client.base.types import (
     ContextMessage,
     InferenceRequest,
     InferenceResponse,
+    Role,
 )
 from inference_client.exceptions import (
     ConfigurationError,
@@ -86,7 +87,7 @@ class TestOllamaProvider:
         assert response.message == "Hello! How can I help you?"
         mock_client.chat.assert_called_once_with(
             model="llama2:7b",
-            messages=[{"role": "user", "content": "Hello"}],
+            messages=[{"role": Role.USER, "content": "Hello"}],
             options={"timeout": 30},
         )
 
@@ -107,10 +108,11 @@ class TestOllamaProvider:
             message="What about Python?",
             context=[
                 ContextMessage(
-                    role="user", content="What's a good programming language?"
+                    role=Role.USER, content="What's a good programming language?"
                 ),
                 ContextMessage(
-                    role="assistant", content="JavaScript is good for web development"
+                    role=Role.ASSISTANT,
+                    content="JavaScript is good for web development",
                 ),
             ],
         )
@@ -120,9 +122,12 @@ class TestOllamaProvider:
 
         # Verify
         expected_messages = [
-            {"role": "user", "content": "What's a good programming language?"},
-            {"role": "assistant", "content": "JavaScript is good for web development"},
-            {"role": "user", "content": "What about Python?"},
+            {"role": Role.USER, "content": "What's a good programming language?"},
+            {
+                "role": Role.ASSISTANT,
+                "content": "JavaScript is good for web development",
+            },
+            {"role": Role.USER, "content": "What about Python?"},
         ]
 
         mock_client.chat.assert_called_once_with(
@@ -146,8 +151,8 @@ class TestOllamaProvider:
             model="llama2:7b",
             message="And also explain generators",
             context=[
-                ContextMessage(role="user", content="Explain Python decorators"),
-                ContextMessage(role="user", content="Actually, wait"),
+                ContextMessage(role=Role.USER, content="Explain Python decorators"),
+                ContextMessage(role=Role.USER, content="Actually, wait"),
             ],
         )
 
@@ -156,9 +161,9 @@ class TestOllamaProvider:
 
         # Verify - consecutive user messages are preserved
         expected_messages = [
-            {"role": "user", "content": "Explain Python decorators"},
-            {"role": "user", "content": "Actually, wait"},
-            {"role": "user", "content": "And also explain generators"},
+            {"role": Role.USER, "content": "Explain Python decorators"},
+            {"role": Role.USER, "content": "Actually, wait"},
+            {"role": Role.USER, "content": "And also explain generators"},
         ]
 
         mock_client.chat.assert_called_once_with(
@@ -182,9 +187,9 @@ class TestOllamaProvider:
             model="llama2:7b",
             message="Continue",
             context=[
-                ContextMessage(role="user", content="Help me debug this"),
-                ContextMessage(role="assistant", content="Let me check the code..."),
-                ContextMessage(role="assistant", content="I found the issue!"),
+                ContextMessage(role=Role.USER, content="Help me debug this"),
+                ContextMessage(role=Role.ASSISTANT, content="Let me check the code..."),
+                ContextMessage(role=Role.ASSISTANT, content="I found the issue!"),
             ],
         )
 
@@ -193,10 +198,10 @@ class TestOllamaProvider:
 
         # Verify - consecutive assistant messages are preserved
         expected_messages = [
-            {"role": "user", "content": "Help me debug this"},
-            {"role": "assistant", "content": "Let me check the code..."},
-            {"role": "assistant", "content": "I found the issue!"},
-            {"role": "user", "content": "Continue"},
+            {"role": Role.USER, "content": "Help me debug this"},
+            {"role": Role.ASSISTANT, "content": "Let me check the code..."},
+            {"role": Role.ASSISTANT, "content": "I found the issue!"},
+            {"role": Role.USER, "content": "Continue"},
         ]
 
         mock_client.chat.assert_called_once_with(
