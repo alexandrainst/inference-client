@@ -56,5 +56,19 @@ class InferenceClient:
         if not request.message.strip():
             raise InferenceRequestError("Input message cannot be empty.")
 
+        if request.model not in self.provider.models:
+            raise InferenceRequestError(
+                f"Model '{request.model}' is not supported by the provider."
+            )
+
         response = self.provider.predict(request)
         return response
+
+    def models(self) -> list[str]:
+        """
+        Get the list of supported models from the configured provider.
+
+        :return: A list of supported model names.
+        :rtype: list[str]
+        """
+        return self.provider.models

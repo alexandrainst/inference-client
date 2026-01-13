@@ -29,3 +29,13 @@ class OpenAIProvider(BaseProvider):
         # Implement the logic to call OpenAI's API with the request data
         # and return an InferenceResponse object.
         pass
+
+    def supported_models(self) -> list[str]:
+        """
+        Return a list of supported model names by the OpenAI provider.
+
+        :return: A list of supported model names.
+        :rtype: list[str]
+        """
+        # TODO: Implement OpenAI models retrieval
+        pass

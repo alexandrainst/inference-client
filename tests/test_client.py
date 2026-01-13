@@ -15,6 +15,9 @@ class DummyProvider(BaseProvider):
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         return InferenceResponse(message="dummy response")
 
+    def supported_models(self) -> list[str]:
+        return ["dummy"]
+
 
 @pytest.fixture
 def client():

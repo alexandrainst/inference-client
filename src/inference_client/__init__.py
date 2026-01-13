@@ -2,7 +2,7 @@
 This file initializes the inference_client package.
 """
 
-from .base.types import InferenceRequest, InferenceResponse
+from .base.types import ContextMessage, InferenceRequest, InferenceResponse
 from .client import InferenceClient
 from .exceptions import (
     ConfigurationError,
@@ -12,6 +12,7 @@ from .exceptions import (
 )
 
 __all__ = [
+    "ContextMessage",
     "InferenceClient",
     "InferenceClientError",
     "InferenceRequestError",

@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Optional
 
 
@@ -37,13 +38,53 @@ class InferenceResponse:
         return bool(self.message or self.images)
 
 
+class Role(Enum):
+    """Valid roles for context messages."""
+
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+class ContextMessage:
+    """
+    A single message in the conversation context with an explicit role.
+    """
+
+    def __init__(self, role: Role, content: str):
+        """
+        Constructor for ContextMessage.
+
+        :param role: The role of the message sender.
+        :type role: Role
+        :param content: The content of the message.
+        :type content: str
+        """
+        if role not in (Role.USER, Role.ASSISTANT):
+            raise ValueError(f"Role must be 'user' or 'assistant', got '{role}'")
+        self.role = role
+        self.content = content
+
+
 class InferenceRequest:
     """
     A request made to an inference provider, containing the model name,
     the input message, and optional context information.
     """
 
-    def __init__(self, model: str, message: str, context: Optional[List[str]] = None):
+    def __init__(
+        self, model: str, message: str, context: Optional[List[ContextMessage]] = None
+    ):
+        """
+        Constructor for InferenceRequest.
+
+        :param model: The name of the model to use for inference.
+        :type model: str
+        :param message: The input message to send to the model.
+        :type message: str
+        :param context: Optional list of previous messages in the conversation,
+                        each with an explicit role ('user' or 'assistant').
+        :type context: Optional[List[ContextMessage]]
+        """
         self.model = model
         self.message = message
         self.context = context or []
