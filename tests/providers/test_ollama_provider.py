@@ -183,7 +183,7 @@ class TestOllamaProvider:
         """Test prediction with connection error."""
         mock_client = Mock()
         mock_client_class.return_value = mock_client
-        mock_client.list.side_effect = Exception("Connection refused")
+        mock_client.chat.side_effect = Exception("Connection refused")
 
         provider = OllamaProvider()
         request = InferenceRequest(model="llama2:7b", message="Hello")

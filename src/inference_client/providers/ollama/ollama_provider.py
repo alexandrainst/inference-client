@@ -99,10 +99,27 @@ class OllamaProvider(BaseProvider):
                 options={"timeout": self.timeout},
             )
 
-            if not response or "message" not in response:
+            if not response:
                 raise InferenceRequestError("Invalid response from Ollama service")
 
-            assistant_message = response["message"].get("content", "")
+            # Extract message - handle both typed response and dict format
+            message_obj = getattr(response, "message", None)
+            if message_obj is None:
+                message_obj = (
+                    response.get("message") if isinstance(response, dict) else None
+                )
+
+            if not message_obj:
+                raise InferenceRequestError("Invalid response from Ollama service")
+
+            # Extract content from message
+            assistant_message = getattr(message_obj, "content", None)
+            if assistant_message is None:
+                assistant_message = (
+                    message_obj.get("content", "")
+                    if isinstance(message_obj, dict)
+                    else ""
+                )
 
             if not assistant_message:
                 raise InferenceRequestError("Empty response from Ollama service")
@@ -142,16 +159,34 @@ class OllamaProvider(BaseProvider):
             # Get list of models from Ollama
             models_response = self._client.list()
 
-            if not models_response or "models" not in models_response:
+            if not models_response:
                 raise InferenceRequestError(
                     "Invalid response when fetching models from Ollama"
                 )
 
-            # Extract model names
+            # Extract models - handle both typed response and dict format
+            models = getattr(models_response, "models", None)
+            if models is None:
+                models = (
+                    models_response.get("models", [])
+                    if isinstance(models_response, dict)
+                    else []
+                )
+
+            if not models:
+                raise InferenceRequestError(
+                    "No models available in Ollama. "
+                    "Please pull at least one model using: ollama pull <model-name>"
+                )
+
+            # Extract model names - handle both Model objects and dicts
             model_names = []
-            for model in models_response["models"]:
-                if "name" in model:
-                    model_names.append(model["name"])
+            for model in models:
+                name = getattr(model, "model", None) or (
+                    model.get("name") if isinstance(model, dict) else None
+                )
+                if name:
+                    model_names.append(name)
 
             if not model_names:
                 raise InferenceRequestError(

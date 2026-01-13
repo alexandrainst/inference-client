@@ -63,3 +63,12 @@ class InferenceClient:
 
         response = self.provider.predict(request)
         return response
+
+    def models(self) -> list[str]:
+        """
+        Get the list of supported models from the configured provider.
+
+        :return: A list of supported model names.
+        :rtype: list[str]
+        """
+        return self.provider.models
