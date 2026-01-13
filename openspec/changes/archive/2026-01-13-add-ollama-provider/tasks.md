@@ -16,7 +16,6 @@
 - [x] Add timeout and retry logic
 - [x] Create integration tests with real Ollama instance
 - [x] Add parameter validation and transformation
-- [x] Implement async operation support
 
 ## Phase 3: Documentation & Polish
 
