@@ -28,9 +28,91 @@ pip install inference-client
 2. Start Ollama service: `ollama serve`
 3. Pull a model: `ollama pull llama2:7b`
 
-### OpenAI (Coming Soon)
+**Usage:**
 
-OpenAI GPT models support will be available in future releases.
+```python
+from inference_client.providers.ollama import OllamaProvider
+from inference_client.base.types import InferenceRequest
+
+# Initialize provider (defaults to http://localhost:11434)
+provider = OllamaProvider()
+
+# Or with custom configuration
+provider = OllamaProvider(host="http://localhost:11434", timeout=60)
+
+# List available models
+models = provider.supported_models()
+print(f"Available models: {models}")
+
+# Make a prediction
+request = InferenceRequest(model="llama2:7b", message="Hello, how are you?")
+response = provider.predict(request)
+print(response.message)
+```
+
+### OpenAI
+
+[OpenAI](https://openai.com/) provides cloud-based inference with GPT models.
+
+**Prerequisites:**
+1. Get an API key from [https://platform.openai.com/](https://platform.openai.com/)
+2. Set the environment variable: `export OPENAI_API_KEY="sk-..."`
+
+**Usage:**
+
+```python
+from inference_client.providers.openai import OpenAIProvider
+from inference_client.base.types import InferenceRequest, ContextMessage, Role
+
+# Initialize provider (uses OPENAI_API_KEY environment variable)
+provider = OpenAIProvider()
+
+# Or with explicit API key
+provider = OpenAIProvider(api_key="sk-...", timeout=60)
+
+# List available models
+models = provider.supported_models()
+print(f"Available models: {models}")
+
+# Make a prediction
+request = InferenceRequest(model="gpt-4o-mini", message="Hello, how are you?")
+response = provider.predict(request)
+print(response.message)
+
+# Multi-turn conversation with context
+context = [
+    ContextMessage(role=Role.USER, content="My name is Alice."),
+    ContextMessage(role=Role.ASSISTANT, content="Nice to meet you, Alice!"),
+]
+request = InferenceRequest(
+    model="gpt-4o-mini",
+    message="What's my name?",
+    context=context,
+)
+response = provider.predict(request)
+print(response.message)  # Will remember the name from context
+```
+
+## Error Handling
+
+All providers use consistent exception types:
+
+```python
+from inference_client.exceptions import (
+    ConfigurationError,      # Invalid configuration (API key, URL, etc.)
+    InferenceRequestError,   # Request failed (model not found, rate limit, etc.)
+    InferenceTimeoutError,   # Request timed out
+)
+
+try:
+    response = provider.predict(request)
+except ConfigurationError as e:
+    print(f"Configuration issue: {e}")
+except InferenceTimeoutError as e:
+    print(f"Request timed out: {e}")
+except InferenceRequestError as e:
+    print(f"Request failed: {e}")
+```
 
 
 ## Contributing
