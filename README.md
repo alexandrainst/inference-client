@@ -50,31 +50,40 @@ response = provider.predict(request)
 print(response.message)
 ```
 
-### OpenAI
+### Azure OpenAI
 
-[OpenAI](https://openai.com/) provides cloud-based inference with GPT models.
+[Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service) provides cloud-based inference with GPT models through Azure.
 
 **Prerequisites:**
-1. Get an API key from [https://platform.openai.com/](https://platform.openai.com/)
-2. Set the environment variable: `export OPENAI_API_KEY="sk-..."`
+1. Create an Azure OpenAI resource in the [Azure Portal](https://portal.azure.com/)
+2. Deploy a model in Azure OpenAI Studio
+3. Set the environment variables:
+   ```bash
+   export AZURE_OPENAI_API_KEY="your-api-key"
+   export AZURE_OPENAI_ENDPOINT="https://your-resource-name.openai.azure.com/"
+   ```
 
 **Usage:**
 
 ```python
-from inference_client.providers.openai import OpenAIProvider
+from inference_client.providers.azure_openai import AzureOpenAIProvider
 from inference_client.base.types import InferenceRequest, ContextMessage, Role
 
-# Initialize provider (uses OPENAI_API_KEY environment variable)
-provider = OpenAIProvider()
+# Initialize provider (uses environment variables)
+provider = AzureOpenAIProvider()
 
-# Or with explicit API key
-provider = OpenAIProvider(api_key="sk-...", timeout=60)
+# Or with explicit configuration
+provider = AzureOpenAIProvider(
+    api_key="your-api-key",
+    azure_endpoint="https://your-resource-name.openai.azure.com/",
+    timeout=60
+)
 
-# List available models
+# List available models (deployment names)
 models = provider.supported_models()
 print(f"Available models: {models}")
 
-# Make a prediction
+# Make a prediction (use your deployment name as the model)
 request = InferenceRequest(model="gpt-4o-mini", message="Hello, how are you?")
 response = provider.predict(request)
 print(response.message)

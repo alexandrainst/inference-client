@@ -3,8 +3,8 @@ from typing import Optional
 from inference_client.base.provider import BaseProvider
 from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import InferenceRequestError
+from inference_client.providers.azure_openai import AzureOpenAIProvider
 from inference_client.providers.ollama import OllamaProvider
-from inference_client.providers.openai import OpenAIProvider
 
 
 class InferenceClient:
@@ -28,17 +28,26 @@ class InferenceClient:
         return cls(provider=ollama_provider)
 
     @classmethod
-    def create_openai_client(cls, api_key: str) -> "InferenceClient":
+    def create_azure_openai_client(
+        cls,
+        api_key: Optional[str] = None,
+        azure_endpoint: Optional[str] = None,
+    ) -> "InferenceClient":
         """
-        Create an InferenceClient instance configured to use the OpenAI provider.
+        Create an InferenceClient instance configured to use the Azure OpenAI provider.
 
-        :param api_key: The API key for OpenAI.
+        :param api_key: The API key for Azure OpenAI. If not provided, reads from
+                        AZURE_OPENAI_API_KEY environment variable.
+        :param azure_endpoint: The Azure OpenAI endpoint URL. If not provided, reads
+                               from AZURE_OPENAI_ENDPOINT environment variable.
 
-        :return: An InferenceClient instance with OpenAIProvider.
+        :return: An InferenceClient instance with AzureOpenAIProvider.
         :rtype: InferenceClient
         """
-        openai_provider = OpenAIProvider(api_key=api_key)
-        return cls(provider=openai_provider)
+        azure_provider = AzureOpenAIProvider(
+            api_key=api_key, azure_endpoint=azure_endpoint
+        )
+        return cls(provider=azure_provider)
 
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         """

@@ -1,6 +1,6 @@
 # This file initializes the providers module.
 
+from .azure_openai import AzureOpenAIProvider
 from .ollama import OllamaProvider
-from .openai import OpenAIProvider
 
-__all__ = ["OllamaProvider", "OpenAIProvider"]
+__all__ = ["AzureOpenAIProvider", "OllamaProvider"]
