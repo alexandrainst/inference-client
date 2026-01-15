@@ -46,7 +46,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: unit-tests
     # Only run integration tests on main branch or when explicitly triggered
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
