@@ -1,14 +1,11 @@
 name: Build and Validate Package
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-
+  workflow_dispatch:
+    
 jobs:
   build-and-validate:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     strategy:
       matrix:
