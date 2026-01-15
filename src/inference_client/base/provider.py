@@ -27,6 +27,20 @@ class BaseProvider:
             self._models = self.supported_models()
         return self._models
 
+    @models.setter
+    def models(self, value: list[str]) -> None:
+        """
+        Set the list of supported models for this provider.
+
+        This is useful for providers like Azure OpenAI where the list of
+        available deployments cannot be retrieved via API and must be
+        configured manually.
+
+        Args:
+            value: A list of model/deployment names.
+        """
+        self._models = value
+
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         """
         Make a prediction using the inference provider.

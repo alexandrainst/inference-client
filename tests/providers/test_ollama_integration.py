@@ -61,3 +61,52 @@ class TestOllamaIntegration:
         assert response.is_valid()
         assert isinstance(response.message, str)
         assert len(response.message) > 0
+
+
+@pytest.mark.integration
+class TestOllamaClientIntegration:
+    """Integration tests for Ollama through InferenceClient."""
+
+    def test_client_predict_through_inference_client(self, ollama_server):
+        """Test that InferenceClient works with Ollama provider."""
+        from inference_client import InferenceClient, InferenceRequest
+
+        # Create client using class method
+        client = InferenceClient.create_ollama_client(host=ollama_server)
+
+        # Get available models from the provider
+        models = client.provider.models
+        assert len(models) > 0, "No models available on Ollama server"
+        model = models[0]
+
+        request = InferenceRequest(
+            model=model,
+            message="Hello",
+        )
+
+        response = client.predict(request)
+
+        assert response is not None
+        assert response.is_valid()
+        assert isinstance(response.message, str)
+        assert len(response.message) > 0
+
+    def test_client_predict_with_invalid_model_fails(self, ollama_server):
+        """Test that InferenceClient fails validation for non-existent model."""
+        from inference_client import (
+            InferenceClient,
+            InferenceRequest,
+            InferenceRequestError,
+        )
+
+        client = InferenceClient.create_ollama_client(host=ollama_server)
+
+        request = InferenceRequest(
+            model="non-existent-model-12345",
+            message="Hello",
+        )
+
+        with pytest.raises(InferenceRequestError) as exc_info:
+            client.predict(request)
+
+        assert "not supported by the provider" in str(exc_info.value)
