@@ -32,22 +32,56 @@ class InferenceClient:
         cls,
         api_key: Optional[str] = None,
         azure_endpoint: Optional[str] = None,
+        api_version: str = "2024-02-01",
+        timeout: int = 60,
+        deployments: Optional[list[str]] = None,
     ) -> "InferenceClient":
         """
         Create an InferenceClient instance configured to use the Azure OpenAI provider.
 
-        :param api_key: The API key for Azure OpenAI. If not provided, reads from
-                        AZURE_OPENAI_API_KEY environment variable.
-        :param azure_endpoint: The Azure OpenAI endpoint URL. If not provided, reads
-                               from AZURE_OPENAI_ENDPOINT environment variable.
+        :param api_key: The Azure OpenAI API key. If not provided,
+                        reads from AZURE_OPENAI_API_KEY environment variable.
+        :type api_key: Optional[str]
+        :param azure_endpoint: The Azure OpenAI resource endpoint URL.
+                               Example: https://your-resource-name.openai.azure.com
+                               If not provided, reads from AZURE_OPENAI_ENDPOINT.
+        :type azure_endpoint: Optional[str]
+        :param api_version: The Azure OpenAI API version (default: "2024-02-01").
+        :type api_version: str
+        :param timeout: Request timeout in seconds (default: 60).
+        :type timeout: int
+        :param deployments: List of deployment names available in your Azure OpenAI resource.
+                            Required for model validation. These are the names you created
+                            in the Azure portal, not the underlying model names.
+        :type deployments: Optional[list[str]]
 
         :return: An InferenceClient instance with AzureOpenAIProvider.
         :rtype: InferenceClient
+
+        :raises ConfigurationError: If required configuration is missing.
+
+        Example::
+
+            client = create_azure_openai_client(
+                deployments=["my-gpt4-deployment", "my-gpt35-deployment"]
+            )
+            response = client.predict(InferenceRequest(
+                model="my-gpt4-deployment",
+                message="Hello!"
+            ))
         """
-        azure_provider = AzureOpenAIProvider(
-            api_key=api_key, azure_endpoint=azure_endpoint
+        provider = AzureOpenAIProvider(
+            api_key=api_key,
+            azure_endpoint=azure_endpoint,
+            api_version=api_version,
+            timeout=timeout,
         )
-        return cls(provider=azure_provider)
+
+        # Set the deployments list so model validation works
+        if deployments:
+            provider.models = deployments
+
+        return cls(provider=provider)
 
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         """

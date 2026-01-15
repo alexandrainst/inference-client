@@ -51,6 +51,16 @@ The Azure OpenAI provider SHALL acknowledge Azure's deployment-based architectur
 - **THEN** it SHALL return an empty list
 - **AND** this reflects Azure's API limitation (deployments not queryable via API)
 
+#### Scenario: Factory method with deployments parameter
+- **WHEN** InferenceClient.create_azure_openai_client() is called with a deployments list
+- **THEN** it SHALL set the provider's models to the provided deployment names
+- **AND** model validation in InferenceClient.predict() SHALL succeed for listed deployments
+
+#### Scenario: Factory method without deployments parameter
+- **WHEN** InferenceClient.create_azure_openai_client() is called without deployments
+- **THEN** model validation SHALL fail for any model name
+- **AND** InferenceClient.predict() SHALL raise InferenceRequestError
+
 #### Scenario: Deployment not found
 - **WHEN** a non-existent deployment name is used
 - **THEN** it SHALL raise InferenceRequestError
@@ -107,3 +117,5 @@ The Azure OpenAI provider SHALL validate all configuration parameters.
 - Azure OpenAI uses "deployments" instead of model names. Users create deployments in Azure portal and reference them by deployment name.
 - The `model` parameter in `InferenceRequest` should contain the deployment name, not the underlying model name (e.g., "my-gpt4-deployment" not "gpt-4").
 - Azure OpenAI API does not provide an endpoint to list available deployments, so `supported_models()` returns an empty list.
+- To enable model validation in `InferenceClient.predict()`, users must pass their deployment names via the `deployments` parameter when calling `InferenceClient.create_azure_openai_client()`.
+- The `BaseProvider.models` setter was added to support providers that cannot dynamically discover available models.

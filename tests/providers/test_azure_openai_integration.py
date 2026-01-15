@@ -63,3 +63,88 @@ class TestAzureOpenAIIntegration:
         assert response.is_valid()
         assert isinstance(response.message, str)
         assert len(response.message) > 0
+
+
+@pytest.mark.integration
+class TestAzureOpenAIClientIntegration:
+    """Integration tests for Azure OpenAI through InferenceClient."""
+
+    def test_client_predict_with_deployments(self, deployment_name):
+        """Test that InferenceClient works with Azure OpenAI when deployments are provided."""
+        from inference_client import InferenceClient, InferenceRequest
+
+        if not os.environ.get("AZURE_OPENAI_API_KEY"):
+            pytest.skip("AZURE_OPENAI_API_KEY environment variable not set")
+        if not os.environ.get("AZURE_OPENAI_ENDPOINT"):
+            pytest.skip("AZURE_OPENAI_ENDPOINT environment variable not set")
+
+        # Create client with explicit deployments list
+        client = InferenceClient.create_azure_openai_client(
+            deployments=[deployment_name]
+        )
+
+        request = InferenceRequest(
+            model=deployment_name,
+            message="Say 'hello' and nothing else.",
+        )
+
+        response = client.predict(request)
+
+        assert response is not None
+        assert response.is_valid()
+        assert isinstance(response.message, str)
+        assert len(response.message) > 0
+
+    def test_client_predict_without_deployments_fails(self, deployment_name):
+        """Test that InferenceClient fails validation when deployments not provided."""
+        from inference_client import (
+            InferenceClient,
+            InferenceRequest,
+            InferenceRequestError,
+        )
+
+        if not os.environ.get("AZURE_OPENAI_API_KEY"):
+            pytest.skip("AZURE_OPENAI_API_KEY environment variable not set")
+        if not os.environ.get("AZURE_OPENAI_ENDPOINT"):
+            pytest.skip("AZURE_OPENAI_ENDPOINT environment variable not set")
+
+        # Create client WITHOUT deployments - validation should fail
+        client = InferenceClient.create_azure_openai_client()
+
+        request = InferenceRequest(
+            model=deployment_name,
+            message="Say 'hello' and nothing else.",
+        )
+
+        with pytest.raises(InferenceRequestError) as exc_info:
+            client.predict(request)
+
+        assert "not supported by the provider" in str(exc_info.value)
+
+    def test_client_predict_with_wrong_deployment_fails(self, deployment_name):
+        """Test that InferenceClient fails when using unlisted deployment."""
+        from inference_client import (
+            InferenceClient,
+            InferenceRequest,
+            InferenceRequestError,
+        )
+
+        if not os.environ.get("AZURE_OPENAI_API_KEY"):
+            pytest.skip("AZURE_OPENAI_API_KEY environment variable not set")
+        if not os.environ.get("AZURE_OPENAI_ENDPOINT"):
+            pytest.skip("AZURE_OPENAI_ENDPOINT environment variable not set")
+
+        # Create client with a different deployment name
+        client = InferenceClient.create_azure_openai_client(
+            deployments=["other-deployment"]
+        )
+
+        request = InferenceRequest(
+            model=deployment_name,  # This is NOT in the deployments list
+            message="Say 'hello' and nothing else.",
+        )
+
+        with pytest.raises(InferenceRequestError) as exc_info:
+            client.predict(request)
+
+        assert "not supported by the provider" in str(exc_info.value)
