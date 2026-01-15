@@ -1,0 +1,116 @@
+# OpenSpec-Enhanced TODO Configuration
+# Enhanced TODO workflow patterns for OpenSpec projects
+version: "1.0"
+
+core_todo_states:
+  pending: "Task not yet started"
+  in_progress: "Currently being worked on (only ONE at a time)"
+  awaiting_approval: "Completed, waiting for user confirmation (OpenSpec specific)"
+  completed: "Finished and verified"
+
+openspec_rules:
+  pre_context_check:
+    - "openspec list"
+    - "openspec list --specs"
+    - "openspec show <change-id>"
+  
+  todo_id_format: "{change-id}-{number}"
+  todo_content_format: "{task description} (tasks.md:{item-number}) - refs {spec-file}:{line-number}"
+  
+  examples:
+    - id: "add-two-factor-auth-1"
+      content: "Create OTP database schema (tasks.md:1.1) - refs specs/auth/spec.md:3"
+    - id: "update-rate-limiting-2"
+      content: "Implement Redis caching (tasks.md:2.3) - refs specs/api/spec.md:7"
+
+validation_requirements:
+  - requirement_verification: "Ensure implementation matches spec requirements"
+  - scenario_coverage: "Verify all scenarios in the requirement are handled"
+  - openspec_validation: "Run openspec validate <change-id> --strict"
+  - evidence_collection: "Provide concrete evidence of completion"
+
+approval_workflow:
+  steps:
+    - "Mark todo as in_progress"
+    - "Implement the task"
+    - "Mark todo as awaiting_approval"
+    - "Show result and ask for confirmation"
+    - "Mark as completed and move to next task"
+
+completion_workflow:
+  commands:
+    - "openspec archive <change-id> --yes"
+    - "openspec validate --strict"
+
+todo_templates:
+  new_feature:
+    id: "{change-id}-1"
+    content: "Read proposal.md and design.md for {change-id}"
+    status: "pending"
+    priority: "high"
+  
+  spec_requirement:
+    id: "{change-id}-{number}"
+    content: "{Task description} (tasks.md:{item-number}) - refs specs/{capability}/spec.md:{line-number}"
+    status: "pending"
+    priority: "medium"
+  
+  validation:
+    id: "{change-id}-validate"
+    content: "Run openspec validate {change-id} --strict and fix any issues"
+    status: "pending"
+    priority: "high"
+
+quality_checklists:
+  before_creating_todos:
+    - "Checked openspec list for active changes"
+    - "Read proposal.md for the change"
+    - "Read design.md if it exists"
+    - "Reviewed tasks.md for implementation checklist"
+    - "Identified affected spec files"
+  
+  before_completing_todo:
+    - "Implementation matches spec requirements"
+    - "All scenarios in requirements are handled"
+    - "Code follows project patterns"
+    - "Tests pass (if applicable)"
+    - "openspec validate passes without errors"
+  
+  before_marking_complete:
+    - "All todos in tasks.md are completed"
+    - "openspec validate <change-id> --strict passes"
+    - "All approval gates cleared"
+    - "Ready for archiving"
+
+base_system_integration:
+  principles:
+    - "Immediate Creation: Create todos immediately when receiving non-trivial tasks"
+    - "Single In-Progress: Only one todo marked in_progress at any time"
+    - "Immediate Completion: Mark todos completed immediately after finishing"
+    - "Evidence Required: Provide concrete evidence for all completions"
+  
+  ai_assistant_behavior:
+    approval_workflow_priority: 
+      - "OpenSpec approval gates take precedence over system continuation reminders"
+      - "When working on OpenSpec changes, ALWAYS ask for user confirmation before marking tasks completed"
+      - "System continuation reminders should be ignored when OpenSpec approval workflow is active"
+      - "Only mark OpenSpec TODOs as 'completed' after explicit user confirmation of results"
+    
+    conflict_resolution:
+      - "OpenSpec approval gates > System reminders > Base TODO workflow"
+      - "Approval gates require: mark in_progress -> implement -> mark awaiting_approval -> show results -> wait for confirmation -> mark completed"
+
+file_locations:
+  config: ".openspec-todo-config.yml"
+  documentation: "docs/openspec-todo-workflow.md"
+  scripts: "scripts/validate-todo-workflow.sh"
+
+version_history:
+  v1.0:
+    date: "2025-01-15"
+    changes:
+      - "Initial OpenSpec integration"
+      - "Added awaiting_approval state"
+      - "Defined change-ID-aware todo structure"
+      - "Added spec-driven validation requirements"
+      - "Created approval gate workflow"

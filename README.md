@@ -13,8 +13,39 @@ A Python library that provides one unified API to call different inference provi
 
 ## Installation
 
+### From PyPI (when published)
+
 ```bash
 pip install inference-client
+```
+
+### From GitHub (development version)
+
+```bash
+# Install latest main branch
+pip install git+https://github.com/your-org/inference-client.git
+
+# Install specific branch
+pip install git+https://github.com/your-org/inference-client.git@develop
+
+# Install specific tag/release
+pip install git+https://github.com/your-org/inference-client.git@v1.0.0
+
+# Install specific commit
+pip install git+https://github.com/your-org/inference-client.git@a1b2c3d
+```
+
+### Install with optional dependencies
+
+```bash
+# Install with OpenAI support
+pip install "inference-client[openai]"
+
+# Install with development dependencies
+pip install "inference-client[dev]"
+
+# Install all optional dependencies
+pip install "inference-client[all]"
 ```
 
 ## Supported Providers
@@ -28,10 +59,57 @@ pip install inference-client
 2. Start Ollama service: `ollama serve`
 3. Pull a model: `ollama pull llama2:7b`
 
-### OpenAI (Coming Soon)
+### OpenAI
 
-OpenAI GPT models support will be available in future releases.
+OpenAI GPT models support is available when installed with the `openai` extra:
 
+```bash
+pip install "inference-client[openai]"
+```
+
+
+### Building the package
+
+```bash
+# Build source distribution and wheel
+python -m build --sdist --wheel --outdir dist
+
+# Validate the package
+check-wheel-contents dist/*.whl
+twine check dist/*
+```
+
+### Testing
+
+```bash
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=inference_client --cov-report=html
+
+# Run tests with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_client.py
+
+# Run tests with coverage and generate report
+pytest --cov=inference_client --cov-report=html --cov-report=term
+
+
+### Version management
+
+This project uses [setuptools-scm](https://github.com/pypa/setuptools_scm) for automatic version management from git tags:
+
+```bash
+# Create a release tag
+git tag v1.0.0
+git push origin v1.0.0
+
+# Development version (automatically generated)
+# Format: 1.0.0.devN+gHASH.dDATE
+```
 
 ## Contributing
 

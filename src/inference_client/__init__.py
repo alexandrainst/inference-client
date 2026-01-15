@@ -11,6 +11,12 @@ from .exceptions import (
     InferenceResponseError,
 )
 
+try:
+    from ._version import version as __version__
+except ImportError:
+    # Fallback for development installations without setuptools-scm
+    __version__ = "unknown"
+
 __all__ = [
     "ContextMessage",
     "InferenceClient",
@@ -20,4 +26,5 @@ __all__ = [
     "ConfigurationError",
     "InferenceRequest",
     "InferenceResponse",
+    "__version__",
 ]

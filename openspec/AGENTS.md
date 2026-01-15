@@ -52,9 +52,10 @@ Track these steps as TODOs and complete them one by one.
 2. **Read design.md** (if exists) - Review technical decisions
 3. **Read tasks.md** - Get implementation checklist
 4. **Implement tasks sequentially** - Complete in order
-5. **Confirm completion** - Ensure every item in `tasks.md` is finished before updating statuses
-6. **Update checklist** - After all work is done, set every task to `- [x]` so the list reflects reality
-7. **Approval gate** - Do not start implementation until the proposal is reviewed and approved
+5. **Approval of subtasks** - When a subtask (a single line in the tasks.md file) has been performed, show the result and ask for confirmation before moving on to the next subtask.
+6. **Update checklist** - After the user has accepted your solution for a subtask by asking you to continue with the next task, set the task to `- [x]` so the list reflects reality
+7. **Confirm completion** - Ensure every item in `tasks.md` is finished before updating statuses
+8. **Approval gate** - Do not start implementation until the proposal is reviewed and approved
 
 ### Stage 3: Archiving Changes
 After deployment, create separate PR to:
