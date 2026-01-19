@@ -56,11 +56,16 @@ class TestOVHIntegration:
     def test_predict_single_message(self, provider):
         """Test that predict returns a valid response for a single message."""
 
-        # models = provider.supported_models()
-        # model = models[0]
+        models = provider.supported_models()
+        models = [
+            m
+            for m in models
+            if ("llama" in m.lower() or "mistral" in m.lower())
+            and "llava" not in m.lower()
+        ]
 
         request = InferenceRequest(
-            model="Mistral-7B-Instruct-v0.3",
+            model=models[0],
             message="Hello, can you respond with a simple greeting?",
         )
 
@@ -88,7 +93,18 @@ class TestOVHClientIntegration:
         # Get available models from the provider
         models = client.provider.models
         assert len(models) > 0, "No models available from OVH AI"
-        model = models[0]
+
+        # Filter for Llama or Mistral models (known LLMs)
+        llama_mistral_models = [
+            m
+            for m in models
+            if ("llama" in m.lower() or "mistral" in m.lower())
+            and "llava" not in m.lower()
+        ]
+        assert len(llama_mistral_models) > 0, (
+            f"No Llama/Mistral models found in {models}"
+        )
+        model = llama_mistral_models[0]
 
         request = InferenceRequest(
             model=model,
