@@ -37,3 +37,9 @@ jobs:
     - name: Test package installation
       run: |
         python -m venv test_wheel_env && test_wheel_env/bin/pip install dist/*.whl && test_wheel_env/bin/python -c "import inference_client; print('Version:', inference_client.__version__); print('Import test passed'); from inference_client import InferenceRequest, InferenceResponse; print('Types import test passed')" && rm -rf test_wheel_env
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-python-${{ matrix.python-version }}
+        path: dist/
