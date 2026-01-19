@@ -47,7 +47,7 @@ jobs:
         python -m venv test_openai_env && test_openai_env/bin/pip install dist/*.whl[openai] && test_openai_env/bin/python -c "import openai; print('OpenAI extra installation test passed')" && rm -rf test_openai_env
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist-python-${{ matrix.python-version }}
         path: dist/
