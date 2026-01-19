@@ -5,6 +5,7 @@ from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import InferenceRequestError
 from inference_client.providers.azure_openai import AzureOpenAIProvider
 from inference_client.providers.ollama import OllamaProvider
+from inference_client.providers.ovh import OVHProvider
 
 
 class InferenceClient:
@@ -80,6 +81,46 @@ class InferenceClient:
         # Set the deployments list so model validation works
         if deployments:
             provider.models = deployments
+
+        return cls(provider=provider)
+
+    @classmethod
+    def create_ovh_client(
+        cls,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout: int = 60,
+    ) -> "InferenceClient":
+        """
+        Create an InferenceClient instance configured to use the OVH AI provider.
+
+        :param api_key: The OVH AI API key. If not provided,
+                        reads from OVH_API_KEY environment variable.
+        :type api_key: Optional[str]
+        :param base_url: The OVH AI base URL.
+                      If not provided, reads from OVH_AI_ENDPOINT environment variable.
+        :type base_url: Optional[str]
+        :param timeout: Request timeout in seconds (default: 60).
+        :type timeout: int
+
+        :return: An InferenceClient instance with OVHProvider.
+        :rtype: InferenceClient
+
+        :raises ConfigurationError: If required configuration is missing.
+
+        Example::
+
+            client = InferenceClient.create_ovh_client()
+            response = client.predict(InferenceRequest(
+                model="gpt-4",
+                message="Hello!"
+            ))
+        """
+        provider = OVHProvider(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+        )
 
         return cls(provider=provider)
 
