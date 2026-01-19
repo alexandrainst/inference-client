@@ -13,12 +13,6 @@ A Python library that provides one unified API to call different inference provi
 
 ## Installation
 
-### From PyPI (when published)
-
-```bash
-pip install inference-client
-```
-
 ### From GitHub (development version)
 
 ```bash
@@ -38,9 +32,6 @@ pip install git+https://github.com/your-org/inference-client.git@a1b2c3d
 ### Install with optional dependencies
 
 ```bash
-# Install with OpenAI support
-pip install "inference-client[openai]"
-
 # Install with development dependencies
 pip install "inference-client[dev]"
 
@@ -58,14 +49,6 @@ pip install "inference-client[all]"
 1. Install Ollama from [https://ollama.com/](https://ollama.com/)
 2. Start Ollama service: `ollama serve`
 3. Pull a model: `ollama pull llama2:7b`
-
-### OpenAI
-
-OpenAI GPT models support is available when installed with the `openai` extra:
-
-```bash
-pip install "inference-client[openai]"
-```
 
 
 ### Building the package
