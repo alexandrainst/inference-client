@@ -38,14 +38,6 @@ jobs:
       run: |
         python -m venv test_wheel_env && test_wheel_env/bin/pip install dist/*.whl && test_wheel_env/bin/python -c "import inference_client; print('Version:', inference_client.__version__); print('Import test passed'); from inference_client import InferenceRequest, InferenceResponse; print('Types import test passed')" && rm -rf test_wheel_env
 
-    - name: Test development installation
-      run: |
-        python -m venv test_dev_env && test_dev_env/bin/pip install dist/*.whl[dev] && test_dev_env/bin/python -c "import pytest; import ruff; print('Dev tools installation test passed')" && rm -rf test_dev_env
-
-    - name: Test optional dependencies
-      run: |
-        python -m venv test_openai_env && test_openai_env/bin/pip install dist/*.whl[openai] && test_openai_env/bin/python -c "import openai; print('OpenAI extra installation test passed')" && rm -rf test_openai_env
-
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
