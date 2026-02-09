@@ -306,11 +306,8 @@ class TestOllamaProvider:
         mock_client.list.return_value = {"models": []}
 
         provider = OllamaProvider()
-
-        with pytest.raises(
-            InferenceRequestError, match="No models available in Ollama"
-        ):
-            provider.supported_models()
+        models = provider.supported_models()
+        assert len(models) == 0
 
     @patch("inference_client.providers.ollama.ollama_provider.Client")
     def test_supported_models_connection_error(self, mock_client_class):
