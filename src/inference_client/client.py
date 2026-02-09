@@ -4,6 +4,7 @@ from inference_client.base.provider import BaseProvider
 from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import InferenceRequestError
 from inference_client.providers.azure_openai import AzureOpenAIProvider
+from inference_client.providers.mock.mock_provider import MockProvider
 from inference_client.providers.ollama import OllamaProvider
 from inference_client.providers.ovh import OVHProvider
 
@@ -122,6 +123,21 @@ class InferenceClient:
             timeout=timeout,
         )
 
+        return cls(provider=provider)
+
+    @classmethod
+    def create_mock_client(cls, model_names: list[str]) -> InferenceClient:
+        """
+        Creates a mock client for use in testing. Any 'prediction' it makes will
+        just be an echoing of the input query message.
+
+        :param cls: InferenceClient class.
+        :param model_names: List of names to be returned by the 'supported_models' method.
+        :type model_names: list[str]
+        :return: A mock inference client for use in testing.
+        :rtype: InferenceClient
+        """
+        provider = MockProvider(model_names)
         return cls(provider=provider)
 
     def predict(self, request: InferenceRequest) -> InferenceResponse:
