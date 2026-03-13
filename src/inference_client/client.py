@@ -1,5 +1,3 @@
-from typing import Optional
-
 from inference_client.base.provider import BaseProvider
 from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import InferenceRequestError
@@ -14,7 +12,7 @@ class InferenceClient:
 
     @classmethod
     def create_ollama_client(
-        cls, host: str, api_key: Optional[str] = None
+        cls, host: str, api_key: str | None = None
     ) -> "InferenceClient":
         """
         Create an InferenceClient instance configured to use the Ollama provider.
@@ -31,11 +29,11 @@ class InferenceClient:
     @classmethod
     def create_azure_openai_client(
         cls,
-        api_key: Optional[str] = None,
-        azure_endpoint: Optional[str] = None,
+        api_key: str | None = None,
+        azure_endpoint: str | None = None,
         api_version: str = "2024-02-01",
         timeout: int = 60,
-        deployments: Optional[list[str]] = None,
+        deployments: list[str] | None = None,
     ) -> "InferenceClient":
         """
         Create an InferenceClient instance configured to use the Azure OpenAI provider.
@@ -87,8 +85,8 @@ class InferenceClient:
     @classmethod
     def create_ovh_client(
         cls,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
         timeout: int = 60,
     ) -> "InferenceClient":
         """

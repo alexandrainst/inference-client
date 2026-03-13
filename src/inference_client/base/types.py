@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Optional
 
 
 class InferenceResponse:
@@ -9,7 +8,7 @@ class InferenceResponse:
     """
 
     def __init__(
-        self, message: Optional[str] = None, images: Optional[List[bytes]] = None
+        self, message: str | None = None, images: list[bytes] | None = None
     ):
         """
         Constructor for InferenceResponse. Creates an instance of InferenceResponse
@@ -18,9 +17,9 @@ class InferenceResponse:
         to create a valid response.
 
         :param message: The text message returned by the inference provider.
-        :type message: Optional[str]
+        :type message: str | None
         :param images: The images returned by the inference provider in bytes format.
-        :type images: Optional[List[bytes]]
+        :type images: list[bytes] | None
         """
         self.message = message or ""
         self.images = images or []
@@ -72,7 +71,11 @@ class InferenceRequest:
     """
 
     def __init__(
-        self, model: str, message: str, context: Optional[List[ContextMessage]] = None
+        self,
+        model: str,
+        message: str,
+        context: list[ContextMessage] | None = None,
+        images: list[bytes] | None = None,
     ):
         """
         Constructor for InferenceRequest.
@@ -83,8 +86,11 @@ class InferenceRequest:
         :type message: str
         :param context: Optional list of previous messages in the conversation,
                         each with an explicit role ('user' or 'assistant').
-        :type context: Optional[List[ContextMessage]]
+        :type context: list[ContextMessage] | None
+        :param images: Optional list of images as raw bytes to send with the message.
+        :type images: list[bytes] | None
         """
         self.model = model
         self.message = message
         self.context = context or []
+        self.images = images or []

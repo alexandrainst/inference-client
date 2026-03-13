@@ -11,7 +11,6 @@ This requires:
 """
 
 import os
-from typing import Optional
 
 import openai
 from openai import OpenAI
@@ -38,8 +37,8 @@ class OVHProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
         timeout: int = 60,
     ):
         """
@@ -47,10 +46,10 @@ class OVHProvider(BaseProvider):
 
         :param api_key: The OVH API key for authentication. If not provided,
                         will read from OVH_API_KEY environment variable.
-        :type api_key: Optional[str]
+        :type api_key: str | None
         :param base_url: The OVH AI base URL.
                       If not provided, will read from OVH_AI_ENDPOINT environment variable.
-        :type base_url: Optional[str]
+        :type base_url: str | None
         :param timeout: Request timeout in seconds (default: 60).
         :type timeout: int
 
