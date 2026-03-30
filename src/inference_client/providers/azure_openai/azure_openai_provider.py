@@ -8,7 +8,6 @@ This provider uses Azure's hosted OpenAI service, which requires:
 """
 
 import os
-from typing import Optional
 
 import openai
 from openai import AzureOpenAI
@@ -35,8 +34,8 @@ class AzureOpenAIProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        azure_endpoint: Optional[str] = None,
+        api_key: str | None = None,
+        azure_endpoint: str | None = None,
         api_version: str = "2024-02-01",
         timeout: int = 60,
     ):
@@ -175,9 +174,7 @@ class AzureOpenAIProvider(BaseProvider):
             # Extract the assistant's message
             choice = response.choices[0]
             if not choice.message or not choice.message.content:
-                raise InferenceRequestError(
-                    "Empty response from Azure OpenAI service"
-                )
+                raise InferenceRequestError("Empty response from Azure OpenAI service")
 
             return InferenceResponse(message=choice.message.content)
 

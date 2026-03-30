@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 import ollama
 from ollama import Client
@@ -24,7 +23,7 @@ class OllamaProvider(BaseProvider):
     def __init__(
         self,
         host: str = "http://localhost:11434",
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         timeout: int = 30,
     ):
         super().__init__()
@@ -90,7 +89,10 @@ class OllamaProvider(BaseProvider):
                     )
 
             # Add current message
-            messages.append({"role": Role.USER, "content": request.message})
+            current_message = {"role": Role.USER, "content": request.message}
+            if request.images:
+                current_message["images"] = request.images
+            messages.append(current_message)
 
             # Make the chat request
             response = self._client.chat(
