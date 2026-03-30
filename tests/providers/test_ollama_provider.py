@@ -281,6 +281,137 @@ class TestOllamaProvider:
             provider.predict(request)
 
     @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_with_images(self, mock_client_class):
+        """Test prediction with images included in the request."""
+        # Setup
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {
+            "message": {"content": "I see a cat in the image."}
+        }
+
+        provider = OllamaProvider()
+        image_data = [b"fake_image_bytes"]
+        request = InferenceRequest(
+            model="llava:7b", message="What is in this image?", images=image_data
+        )
+
+        # Execute
+        response = provider.predict(request)
+
+        # Verify
+        assert response.message == "I see a cat in the image."
+        mock_client.chat.assert_called_once_with(
+            model="llava:7b",
+            messages=[
+                {
+                    "role": Role.USER,
+                    "content": "What is in this image?",
+                    "images": [b"fake_image_bytes"],
+                }
+            ],
+            options={"timeout": 30},
+        )
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_with_multiple_images(self, mock_client_class):
+        """Test prediction with multiple images in the request."""
+        # Setup
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {
+            "message": {"content": "The first image shows a cat, the second a dog."}
+        }
+
+        provider = OllamaProvider()
+        image_data = [b"image_one", b"image_two"]
+        request = InferenceRequest(
+            model="llava:7b", message="Compare these images", images=image_data
+        )
+
+        # Execute
+        response = provider.predict(request)
+
+        # Verify
+        assert response.message == "The first image shows a cat, the second a dog."
+        mock_client.chat.assert_called_once_with(
+            model="llava:7b",
+            messages=[
+                {
+                    "role": Role.USER,
+                    "content": "Compare these images",
+                    "images": [b"image_one", b"image_two"],
+                }
+            ],
+            options={"timeout": 30},
+        )
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_with_images_and_context(self, mock_client_class):
+        """Test prediction with images and conversation context."""
+        # Setup
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {
+            "message": {"content": "The image shows a landscape."}
+        }
+
+        provider = OllamaProvider()
+        request = InferenceRequest(
+            model="llava:7b",
+            message="What about this image?",
+            context=[
+                ContextMessage(role=Role.USER, content="Can you analyze images?"),
+                ContextMessage(role=Role.ASSISTANT, content="Yes, I can!"),
+            ],
+            images=[b"landscape_bytes"],
+        )
+
+        # Execute
+        response = provider.predict(request)
+
+        # Verify
+        expected_messages = [
+            {"role": Role.USER, "content": "Can you analyze images?"},
+            {"role": Role.ASSISTANT, "content": "Yes, I can!"},
+            {
+                "role": Role.USER,
+                "content": "What about this image?",
+                "images": [b"landscape_bytes"],
+            },
+        ]
+        mock_client.chat.assert_called_once_with(
+            model="llava:7b",
+            messages=expected_messages,
+            options={"timeout": 30},
+        )
+        assert response.message == "The image shows a landscape."
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_without_images_excludes_images_key(self, mock_client_class):
+        """Test that the images key is not included when no images are provided."""
+        # Setup
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {
+            "message": {"content": "Hello!"}
+        }
+
+        provider = OllamaProvider()
+        request = InferenceRequest(model="llama2:7b", message="Hello")
+
+        # Execute
+        provider.predict(request)
+
+        # Verify - the message dict should NOT contain an "images" key
+        actual_messages = mock_client.chat.call_args[1]["messages"]
+        assert "images" not in actual_messages[0]
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
     def test_supported_models_success(self, mock_client_class):
         """Test successful retrieval of supported models."""
         mock_client = Mock()
