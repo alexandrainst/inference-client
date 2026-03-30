@@ -10,7 +10,7 @@ on:
 jobs:
   unit-tests:
     name: Unit Tests
-    runs-on: [self-hosted, self-hosted-ubuntu-latest]
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -46,7 +46,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: [self-hosted, self-hosted-ubuntu-latest]
+    runs-on: self-hosted
     needs: unit-tests
     # Only run integration tests on main branch or when explicitly triggered
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
