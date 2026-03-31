@@ -175,12 +175,6 @@ class OllamaProvider(BaseProvider):
                     else []
                 )
 
-            if not models:
-                raise InferenceRequestError(
-                    "No models available in Ollama. "
-                    "Please pull at least one model using: ollama pull <model-name>"
-                )
-
             # Extract model names - handle both Model objects and dicts
             model_names = []
             for model in models:
@@ -189,12 +183,6 @@ class OllamaProvider(BaseProvider):
                 )
                 if name:
                     model_names.append(name)
-
-            if not model_names:
-                raise InferenceRequestError(
-                    "No models available in Ollama. "
-                    "Please pull at least one model using: ollama pull <model-name>"
-                )
 
             return model_names
 
