@@ -1,9 +1,9 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
-	"name": "Python 3",
+	"name": "Inference-client: Python 3",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/python:2-3.14-trixie",
+	"image": "mcr.microsoft.com/devcontainers/python:3.14-trixie",
 	"runArgs": ["--env-file", ".devcontainer/.env"],
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -30,7 +30,10 @@
 					},
 					"editor.defaultFormatter": "charliermarsh.ruff"
 				},
-				"ruff.nativeServer": "on"
+				"ruff.nativeServer": "on",
+				"ruff.lint.ignore": [
+					"F401" // Unused imports: Auto formatting on save means unused imports are removed, which is very annoying in dev
+				]
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
