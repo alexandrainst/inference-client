@@ -168,7 +168,6 @@ class TestOVHProvider:
         mock_client.chat.completions.create.assert_called_once_with(
             model="gpt-4",
             messages=[{"role": Role.USER.value, "content": "Hello!"}],
-            max_tokens=512,
         )
 
     @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
@@ -205,7 +204,6 @@ class TestOVHProvider:
         mock_client.chat.completions.create.assert_called_once_with(
             model="gpt-4",
             messages=expected_messages,
-            max_tokens=512,
         )
 
     def test_predict_missing_model(self):
