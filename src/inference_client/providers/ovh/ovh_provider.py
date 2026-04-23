@@ -150,7 +150,6 @@ class OVHProvider(BaseProvider):
             response = self._client.chat.completions.create(
                 model=request.model,
                 messages=messages,
-                max_tokens=512,
             )
 
             if not response or not response.choices:
