@@ -3,17 +3,21 @@
 {
 	"name": "Python 3",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/python:2-3.14-trixie",
+	"image": "mcr.microsoft.com/devcontainers/python:2-3.12-trixie",
 	"runArgs": ["--env-file", ".devcontainer/.env"],
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	// Node is installed via the feature (nvm-based) rather than apt, so the
+	// build never touches the Yarn apt repo, whose signing key is missing on trixie.
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {}
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo apt update && sudo apt install -y npm && sudo npm install -g @fission-ai/openspec@latest && pip3 install --user -r requirements.txt",
+	"postCreateCommand": "npm install -g @fission-ai/openspec@latest && pip3 install --user -r requirements.txt",
 
 	// Configure tool-specific properties.
 	"customizations": {

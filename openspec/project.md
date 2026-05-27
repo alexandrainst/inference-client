@@ -4,7 +4,7 @@
 A Python library that provides one unified API to call different inference providers. This project aims to simplify the integration of various AI/ML inference services by providing a consistent interface, reducing the complexity of switching between different providers or using multiple providers simultaneously.
 
 ## Tech Stack
-- **Python 3.14** (primary language)
+- **Python 3.12+** (primary language; supports 3.12–3.14)
 - **Development Environment**: VS Code dev container (Debian GNU/Linux 13 trixie)
 - **Code Quality**: Ruff (formatting, linting, import organization)
 - **Language Server**: Pylance
@@ -47,7 +47,7 @@ A Python library that provides one unified API to call different inference provi
 - **Library Design**: Python library development best practices for developer experience
 
 ## Important Constraints
-- **Python Version**: Requires Python 3.14+
+- **Python Version**: Requires Python 3.12+
 - **OpenSpec Compliance**: All significant changes must go through OpenSpec proposal process
 - **Provider Compatibility**: Must maintain unified interface regardless of underlying provider differences
 - **Developer Experience**: API should be simple and consistent across all supported providers
