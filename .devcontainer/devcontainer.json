@@ -10,7 +10,7 @@
 	// Node is installed via the feature (nvm-based) rather than apt, so the
 	// build never touches the Yarn apt repo, whose signing key is missing on trixie.
 	"features": {
-		"ghcr.io/devcontainers/features/node:1": {}
+		"ghcr.io/devcontainers/features/node:2": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
