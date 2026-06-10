@@ -32,7 +32,7 @@ def clear_ovh_env():
 class TestOVHProvider:
     """Test suite for OVHProvider."""
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_init_with_api_key_and_endpoint(self, mock_openai_class):
         """Test provider initialization with API key and endpoint."""
         mock_client = Mock()
@@ -52,7 +52,7 @@ class TestOVHProvider:
             timeout=60,
         )
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_init_with_env_vars(self, mock_openai_class):
         """Test provider initialization with environment variables."""
         mock_client = Mock()
@@ -70,7 +70,7 @@ class TestOVHProvider:
             timeout=60,
         )
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_init_explicit_overrides_env_vars(self, mock_openai_class):
         """Test that explicit parameters override environment variables."""
         mock_client = Mock()
@@ -135,7 +135,7 @@ class TestOVHProvider:
         ):
             OVHProvider(api_key="test-key", base_url="https://test.com", timeout=0)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_init_client_creation_failure(self, mock_openai_class):
         """Test initialization fails when client creation raises exception."""
         mock_openai_class.side_effect = Exception("Client creation failed")
@@ -145,7 +145,7 @@ class TestOVHProvider:
         ):
             OVHProvider(api_key="test-key", base_url="https://test.com")
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_success_single_message(self, mock_openai_class):
         """Test successful prediction with single message."""
         mock_client = Mock()
@@ -170,7 +170,7 @@ class TestOVHProvider:
             messages=[{"role": Role.USER.value, "content": "Hello!"}],
         )
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_success_with_context(self, mock_openai_class):
         """Test successful prediction with conversation context."""
         mock_client = Mock()
@@ -222,7 +222,7 @@ class TestOVHProvider:
         with pytest.raises(InferenceRequestError, match="Message is required"):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_invalid_response(self, mock_openai_class):
         """Test prediction fails with invalid response from service."""
         mock_client = Mock()
@@ -236,11 +236,11 @@ class TestOVHProvider:
         request = InferenceRequest(model="gpt-4", message="Hello!")
 
         with pytest.raises(
-            InferenceRequestError, match="Invalid response from OVH AI service"
+            InferenceRequestError, match="Invalid response from OVH AI"
         ):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_empty_response_message(self, mock_openai_class):
         """Test prediction fails with empty response message."""
         mock_client = Mock()
@@ -258,11 +258,11 @@ class TestOVHProvider:
         request = InferenceRequest(model="gpt-4", message="Hello!")
 
         with pytest.raises(
-            InferenceRequestError, match="Empty response from OVH AI service"
+            InferenceRequestError, match="Empty response from OVH AI"
         ):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_authentication_error(self, mock_openai_class):
         """Test prediction handles authentication error."""
         mock_client = Mock()
@@ -280,7 +280,7 @@ class TestOVHProvider:
         with pytest.raises(ConfigurationError, match="Invalid API key"):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_rate_limit_error(self, mock_openai_class):
         """Test prediction handles rate limit error."""
         mock_client = Mock()
@@ -298,7 +298,7 @@ class TestOVHProvider:
         with pytest.raises(InferenceRequestError, match="Rate limit exceeded"):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_not_found_error(self, mock_openai_class):
         """Test prediction handles model not found error."""
         mock_client = Mock()
@@ -318,7 +318,7 @@ class TestOVHProvider:
         ):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_timeout_error(self, mock_openai_class):
         """Test prediction handles timeout error."""
         mock_client = Mock()
@@ -334,7 +334,7 @@ class TestOVHProvider:
         with pytest.raises(InferenceTimeoutError, match="OVH AI request timed out"):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_predict_connection_error(self, mock_openai_class):
         """Test prediction handles connection error."""
         mock_client = Mock()
@@ -348,11 +348,11 @@ class TestOVHProvider:
         request = InferenceRequest(model="gpt-4", message="Hello!")
 
         with pytest.raises(
-            InferenceRequestError, match="Failed to connect to OVH AI service"
+            InferenceRequestError, match="Failed to connect to OVH AI"
         ):
             provider.predict(request)
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_supported_models_success(self, mock_openai_class):
         """Test successful retrieval of supported models."""
         mock_client = Mock()
@@ -373,7 +373,7 @@ class TestOVHProvider:
         assert models == ["gpt-4", "gpt-3.5-turbo"]
         mock_client.models.list.assert_called_once()
 
-    @patch("inference_client.providers.ovh.ovh_provider.OpenAI")
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
     def test_supported_models_failure(self, mock_openai_class):
         """Test failure when retrieving supported models."""
         mock_client = Mock()
