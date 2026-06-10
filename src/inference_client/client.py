@@ -3,6 +3,7 @@ from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import InferenceRequestError
 from inference_client.providers.azure_openai import AzureOpenAIProvider
 from inference_client.providers.ollama import OllamaProvider
+from inference_client.providers.openai_compatible import OpenAICompatibleProvider
 from inference_client.providers.ovh import OVHProvider
 
 
@@ -115,6 +116,52 @@ class InferenceClient:
             ))
         """
         provider = OVHProvider(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+        )
+
+        return cls(provider=provider)
+
+    @classmethod
+    def create_openai_compatible_client(
+        cls,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout: int = 60,
+    ) -> "InferenceClient":
+        """
+        Create an InferenceClient for any OpenAI-compatible inference server.
+
+        Use this for self-hosted or third-party servers that expose the
+        standard OpenAI chat-completions API (``/v1/chat/completions`` and
+        ``/v1/models``) — e.g. vLLM, Text Generation Inference, OpenRouter.
+
+        :param api_key: The API key for the server.
+        :type api_key: Optional[str]
+        :param base_url: The base URL of the server, including the API version
+                         path (e.g. ``https://host/v1``).
+        :type base_url: Optional[str]
+        :param timeout: Request timeout in seconds (default: 60).
+        :type timeout: int
+
+        :return: An InferenceClient instance with OpenAICompatibleProvider.
+        :rtype: InferenceClient
+
+        :raises ConfigurationError: If required configuration is missing.
+
+        Example::
+
+            client = InferenceClient.create_openai_compatible_client(
+                api_key="sk-...",
+                base_url="https://my-server/v1",
+            )
+            response = client.predict(InferenceRequest(
+                model="my-model",
+                message="Hello!"
+            ))
+        """
+        provider = OpenAICompatibleProvider(
             api_key=api_key,
             base_url=base_url,
             timeout=timeout,
