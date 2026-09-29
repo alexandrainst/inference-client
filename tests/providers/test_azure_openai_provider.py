@@ -463,3 +463,39 @@ class TestAzureOpenAIProvider:
         models = provider.models
 
         assert models == []
+
+    @patch("inference_client.providers.azure_openai.azure_openai_provider.AzureOpenAI")
+    def test_predict_with_system_prompt(self, mock_azure_openai_class):
+        """Test that the system prompt is sent as the first message."""
+        mock_client = Mock()
+        mock_azure_openai_class.return_value = mock_client
+
+        mock_message = Mock()
+        mock_message.content = "Paris."
+        mock_choice = Mock()
+        mock_choice.message = mock_message
+        mock_response = Mock()
+        mock_response.choices = [mock_choice]
+        mock_client.chat.completions.create.return_value = mock_response
+
+        provider = AzureOpenAIProvider(
+            api_key="test-api-key",
+            azure_endpoint="https://test.openai.azure.com",
+        )
+        request = InferenceRequest(
+            model="gpt-4-deployment",
+            message="What is the capital of France?",
+            context=[ContextMessage(role=Role.USER, content="Hi there!")],
+            system_prompt="Answer in one word.",
+        )
+
+        provider.predict(request)
+
+        mock_client.chat.completions.create.assert_called_once_with(
+            model="gpt-4-deployment",
+            messages=[
+                {"role": "system", "content": "Answer in one word."},
+                {"role": "user", "content": "Hi there!"},
+                {"role": "user", "content": "What is the capital of France?"},
+            ],
+        )

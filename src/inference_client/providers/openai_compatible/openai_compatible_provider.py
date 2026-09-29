@@ -13,7 +13,7 @@ import openai
 from openai import OpenAI
 
 from inference_client.base.provider import BaseProvider
-from inference_client.base.types import InferenceRequest, InferenceResponse, Role
+from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import (
     ConfigurationError,
     InferenceRequestError,
@@ -150,17 +150,7 @@ class OpenAICompatibleProvider(BaseProvider):
 
         try:
             # Build chat messages
-            messages = []
-
-            # Add context messages if provided (multi-turn conversation)
-            if request.context:
-                for context_msg in request.context:
-                    messages.append(
-                        {"role": context_msg.role.value, "content": context_msg.content}
-                    )
-
-            # Add current message
-            messages.append({"role": Role.USER.value, "content": request.message})
+            messages = self._build_messages(request)
 
             # Make the chat completion request
             response = self._client.chat.completions.create(
