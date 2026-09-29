@@ -5,7 +5,7 @@ import openai
 import pytest
 
 from inference_client.base.types import (
-    ContextMessage,
+    ChatMessage,
     InferenceRequest,
     Role,
 )
@@ -171,8 +171,8 @@ class TestOVHProvider:
         )
 
     @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
-    def test_predict_success_with_context(self, mock_openai_class):
-        """Test successful prediction with conversation context."""
+    def test_predict_success_with_chat_history(self, mock_openai_class):
+        """Test successful prediction with chat history."""
         mock_client = Mock()
         mock_openai_class.return_value = mock_client
 
@@ -180,22 +180,22 @@ class TestOVHProvider:
         mock_response = Mock()
         mock_choice = Mock()
         mock_message = Mock()
-        mock_message.content = "Response with context"
+        mock_message.content = "Response with chat history"
         mock_choice.message = mock_message
         mock_response.choices = [mock_choice]
         mock_client.chat.completions.create.return_value = mock_response
 
         provider = OVHProvider(api_key="test-key", base_url="https://test.com")
-        context = [
-            ContextMessage(role=Role.USER, content="Previous message"),
-            ContextMessage(role=Role.ASSISTANT, content="Previous response"),
+        chat_history = [
+            ChatMessage(role=Role.USER, content="Previous message"),
+            ChatMessage(role=Role.ASSISTANT, content="Previous response"),
         ]
         request = InferenceRequest(
-            model="gpt-4", message="Current message", context=context
+            model="gpt-4", message="Current message", chat_history=chat_history
         )
         response = provider.predict(request)
 
-        assert response.message == "Response with context"
+        assert response.message == "Response with chat history"
         expected_messages = [
             {"role": "user", "content": "Previous message"},
             {"role": "assistant", "content": "Previous response"},

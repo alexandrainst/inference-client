@@ -41,7 +41,7 @@ class Role(Enum):
     """
     Roles a chat message can have.
 
-    Only USER and ASSISTANT are valid for context messages; SYSTEM is set
+    Only USER and ASSISTANT are valid for chat history messages; SYSTEM is set
     through ``InferenceRequest.system_prompt``.
     """
 
@@ -50,14 +50,14 @@ class Role(Enum):
     ASSISTANT = "assistant"
 
 
-class ContextMessage:
+class ChatMessage:
     """
-    A single message in the conversation context with an explicit role.
+    A single message in the chat history with an explicit role.
     """
 
     def __init__(self, role: Role, content: str):
         """
-        Constructor for ContextMessage.
+        Constructor for ChatMessage.
 
         :param role: The role of the message sender.
         :type role: Role
@@ -73,14 +73,14 @@ class ContextMessage:
 class InferenceRequest:
     """
     A request made to an inference provider, containing the model name,
-    the input message, and optional context, images and system prompt.
+    the input message, and optional chat history, images and system prompt.
     """
 
     def __init__(
         self,
         model: str,
         message: str,
-        context: list[ContextMessage] | None = None,
+        chat_history: list[ChatMessage] | None = None,
         images: list[bytes] | None = None,
         system_prompt: str | None = None,
     ):
@@ -91,9 +91,10 @@ class InferenceRequest:
         :type model: str
         :param message: The input message to send to the model.
         :type message: str
-        :param context: Optional list of previous messages in the conversation,
-                        each with an explicit role ('user' or 'assistant').
-        :type context: list[ContextMessage] | None
+        :param chat_history: Optional list of previous messages in the
+                             conversation, each with an explicit role
+                             ('user' or 'assistant').
+        :type chat_history: list[ChatMessage] | None
         :param images: Optional list of images as raw bytes to send with the message.
         :type images: list[bytes] | None
         :param system_prompt: Optional instructions sent to the model as a
@@ -103,6 +104,6 @@ class InferenceRequest:
         """
         self.model = model
         self.message = message
-        self.context = context or []
+        self.chat_history = chat_history or []
         self.images = images or []
         self.system_prompt = system_prompt

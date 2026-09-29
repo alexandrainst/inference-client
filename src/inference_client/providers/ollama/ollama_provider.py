@@ -60,7 +60,7 @@ class OllamaProvider(BaseProvider):
         """
         Make a prediction using the Ollama inference provider.
 
-        :param request: The inference request containing model, input data, and possibly context information.
+        :param request: The inference request containing model, input data, and possibly chat history.
         :type request: InferenceRequest
 
         :return: The inference response from Ollama.

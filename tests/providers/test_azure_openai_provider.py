@@ -5,7 +5,7 @@ import openai
 import pytest
 
 from inference_client.base.types import (
-    ContextMessage,
+    ChatMessage,
     InferenceRequest,
     InferenceResponse,
     Role,
@@ -210,8 +210,8 @@ class TestAzureOpenAIProvider:
         )
 
     @patch("inference_client.providers.azure_openai.azure_openai_provider.AzureOpenAI")
-    def test_predict_with_context(self, mock_azure_openai_class):
-        """Test prediction with conversation context."""
+    def test_predict_with_chat_history(self, mock_azure_openai_class):
+        """Test prediction with chat history."""
         mock_client = Mock()
         mock_azure_openai_class.return_value = mock_client
 
@@ -229,14 +229,14 @@ class TestAzureOpenAIProvider:
             azure_endpoint="https://test.openai.azure.com",
         )
 
-        context = [
-            ContextMessage(role=Role.USER, content="Hi there!"),
-            ContextMessage(role=Role.ASSISTANT, content="Hello! How can I help?"),
+        chat_history = [
+            ChatMessage(role=Role.USER, content="Hi there!"),
+            ChatMessage(role=Role.ASSISTANT, content="Hello! How can I help?"),
         ]
         request = InferenceRequest(
             model="gpt-4-deployment",
             message="What is the capital of France?",
-            context=context,
+            chat_history=chat_history,
         )
 
         response = provider.predict(request)
@@ -485,7 +485,7 @@ class TestAzureOpenAIProvider:
         request = InferenceRequest(
             model="gpt-4-deployment",
             message="What is the capital of France?",
-            context=[ContextMessage(role=Role.USER, content="Hi there!")],
+            chat_history=[ChatMessage(role=Role.USER, content="Hi there!")],
             system_prompt="Answer in one word.",
         )
 
