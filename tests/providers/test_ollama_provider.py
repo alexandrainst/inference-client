@@ -87,7 +87,7 @@ class TestOllamaProvider:
         assert response.message == "Hello! How can I help you?"
         mock_client.chat.assert_called_once_with(
             model="llama2:7b",
-            messages=[{"role": Role.USER, "content": "Hello"}],
+            messages=[{"role": "user", "content": "Hello"}],
             options={"timeout": 30},
         )
 
@@ -122,12 +122,12 @@ class TestOllamaProvider:
 
         # Verify
         expected_messages = [
-            {"role": Role.USER, "content": "What's a good programming language?"},
+            {"role": "user", "content": "What's a good programming language?"},
             {
-                "role": Role.ASSISTANT,
+                "role": "assistant",
                 "content": "JavaScript is good for web development",
             },
-            {"role": Role.USER, "content": "What about Python?"},
+            {"role": "user", "content": "What about Python?"},
         ]
 
         mock_client.chat.assert_called_once_with(
@@ -161,9 +161,9 @@ class TestOllamaProvider:
 
         # Verify - consecutive user messages are preserved
         expected_messages = [
-            {"role": Role.USER, "content": "Explain Python decorators"},
-            {"role": Role.USER, "content": "Actually, wait"},
-            {"role": Role.USER, "content": "And also explain generators"},
+            {"role": "user", "content": "Explain Python decorators"},
+            {"role": "user", "content": "Actually, wait"},
+            {"role": "user", "content": "And also explain generators"},
         ]
 
         mock_client.chat.assert_called_once_with(
@@ -198,10 +198,10 @@ class TestOllamaProvider:
 
         # Verify - consecutive assistant messages are preserved
         expected_messages = [
-            {"role": Role.USER, "content": "Help me debug this"},
-            {"role": Role.ASSISTANT, "content": "Let me check the code..."},
-            {"role": Role.ASSISTANT, "content": "I found the issue!"},
-            {"role": Role.USER, "content": "Continue"},
+            {"role": "user", "content": "Help me debug this"},
+            {"role": "assistant", "content": "Let me check the code..."},
+            {"role": "assistant", "content": "I found the issue!"},
+            {"role": "user", "content": "Continue"},
         ]
 
         mock_client.chat.assert_called_once_with(
@@ -306,7 +306,7 @@ class TestOllamaProvider:
             model="llava:7b",
             messages=[
                 {
-                    "role": Role.USER,
+                    "role": "user",
                     "content": "What is in this image?",
                     "images": [b"fake_image_bytes"],
                 }
@@ -340,7 +340,7 @@ class TestOllamaProvider:
             model="llava:7b",
             messages=[
                 {
-                    "role": Role.USER,
+                    "role": "user",
                     "content": "Compare these images",
                     "images": [b"image_one", b"image_two"],
                 }
@@ -375,10 +375,10 @@ class TestOllamaProvider:
 
         # Verify
         expected_messages = [
-            {"role": Role.USER, "content": "Can you analyze images?"},
-            {"role": Role.ASSISTANT, "content": "Yes, I can!"},
+            {"role": "user", "content": "Can you analyze images?"},
+            {"role": "assistant", "content": "Yes, I can!"},
             {
-                "role": Role.USER,
+                "role": "user",
                 "content": "What about this image?",
                 "images": [b"landscape_bytes"],
             },
@@ -470,3 +470,34 @@ class TestOllamaProvider:
             InferenceRequestError, match="Invalid response when fetching models"
         ):
             provider.supported_models()
+
+    @patch("inference_client.providers.ollama.ollama_provider.Client")
+    def test_predict_with_system_prompt_and_images(self, mock_client_class):
+        """Test that the system prompt comes first and images stay on the user message."""
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+        mock_client.list.return_value = {"models": []}
+        mock_client.chat.return_value = {"message": {"content": "A cat."}}
+
+        provider = OllamaProvider()
+        request = InferenceRequest(
+            model="llava:7b",
+            message="What is in this image?",
+            images=[b"fake_image_bytes"],
+            system_prompt="Answer briefly.",
+        )
+
+        provider.predict(request)
+
+        mock_client.chat.assert_called_once_with(
+            model="llava:7b",
+            messages=[
+                {"role": "system", "content": "Answer briefly."},
+                {
+                    "role": "user",
+                    "content": "What is in this image?",
+                    "images": [b"fake_image_bytes"],
+                },
+            ],
+            options={"timeout": 30},
+        )

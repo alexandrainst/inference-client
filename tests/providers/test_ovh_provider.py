@@ -167,7 +167,7 @@ class TestOVHProvider:
         assert response.message == "Hello from OVH AI!"
         mock_client.chat.completions.create.assert_called_once_with(
             model="gpt-4",
-            messages=[{"role": Role.USER.value, "content": "Hello!"}],
+            messages=[{"role": "user", "content": "Hello!"}],
         )
 
     @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
@@ -197,9 +197,9 @@ class TestOVHProvider:
 
         assert response.message == "Response with context"
         expected_messages = [
-            {"role": Role.USER.value, "content": "Previous message"},
-            {"role": Role.ASSISTANT.value, "content": "Previous response"},
-            {"role": Role.USER.value, "content": "Current message"},
+            {"role": "user", "content": "Previous message"},
+            {"role": "assistant", "content": "Previous response"},
+            {"role": "user", "content": "Current message"},
         ]
         mock_client.chat.completions.create.assert_called_once_with(
             model="gpt-4",
@@ -387,3 +387,33 @@ class TestOVHProvider:
             InferenceRequestError, match="Failed to retrieve models from OVH AI"
         ):
             provider.supported_models()
+
+    @patch("inference_client.providers.openai_compatible.openai_compatible_provider.OpenAI")
+    def test_predict_with_system_prompt(self, mock_openai_class):
+        """Test that the system prompt is sent as the first message."""
+        mock_client = Mock()
+        mock_openai_class.return_value = mock_client
+
+        mock_response = Mock()
+        mock_choice = Mock()
+        mock_message = Mock()
+        mock_message.content = "Response"
+        mock_choice.message = mock_message
+        mock_response.choices = [mock_choice]
+        mock_client.chat.completions.create.return_value = mock_response
+
+        provider = OVHProvider(api_key="test-key", base_url="https://test.com")
+        request = InferenceRequest(
+            model="gpt-4",
+            message="Current message",
+            system_prompt="You are a helpful assistant.",
+        )
+        provider.predict(request)
+
+        mock_client.chat.completions.create.assert_called_once_with(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "Current message"},
+            ],
+        )

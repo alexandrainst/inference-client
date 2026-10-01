@@ -38,8 +38,14 @@ class InferenceResponse:
 
 
 class Role(Enum):
-    """Valid roles for context messages."""
+    """
+    Roles a chat message can have.
 
+    Only USER and ASSISTANT are valid for context messages; SYSTEM is set
+    through ``InferenceRequest.system_prompt``.
+    """
+
+    SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
 
@@ -67,7 +73,7 @@ class ContextMessage:
 class InferenceRequest:
     """
     A request made to an inference provider, containing the model name,
-    the input message, and optional context information.
+    the input message, and optional context, images and system prompt.
     """
 
     def __init__(
@@ -76,6 +82,7 @@ class InferenceRequest:
         message: str,
         context: list[ContextMessage] | None = None,
         images: list[bytes] | None = None,
+        system_prompt: str | None = None,
     ):
         """
         Constructor for InferenceRequest.
@@ -89,8 +96,13 @@ class InferenceRequest:
         :type context: list[ContextMessage] | None
         :param images: Optional list of images as raw bytes to send with the message.
         :type images: list[bytes] | None
+        :param system_prompt: Optional instructions sent to the model as a
+                              leading system message. Empty or whitespace-only
+                              values are treated as no system prompt.
+        :type system_prompt: str | None
         """
         self.model = model
         self.message = message
         self.context = context or []
         self.images = images or []
+        self.system_prompt = system_prompt

@@ -4,7 +4,7 @@ import ollama
 from ollama import Client
 
 from inference_client.base.provider import BaseProvider
-from inference_client.base.types import InferenceRequest, InferenceResponse, Role
+from inference_client.base.types import InferenceRequest, InferenceResponse
 from inference_client.exceptions import (
     ConfigurationError,
     InferenceRequestError,
@@ -79,20 +79,11 @@ class OllamaProvider(BaseProvider):
 
         try:
             # Build chat messages for Ollama
-            messages = []
+            messages = self._build_messages(request)
 
-            # Add context messages if provided (multi-turn conversation)
-            if request.context:
-                for context_msg in request.context:
-                    messages.append(
-                        {"role": context_msg.role, "content": context_msg.content}
-                    )
-
-            # Add current message
-            current_message = {"role": Role.USER, "content": request.message}
+            # Ollama attaches images to the message they belong to
             if request.images:
-                current_message["images"] = request.images
-            messages.append(current_message)
+                messages[-1]["images"] = request.images
 
             # Make the chat request
             response = self._client.chat(

@@ -1,4 +1,4 @@
-from inference_client.base.types import InferenceRequest, InferenceResponse
+from inference_client.base.types import InferenceRequest, InferenceResponse, Role
 
 
 class BaseProvider:
@@ -83,3 +83,32 @@ class BaseProvider:
             InferenceRequestError: If there is an error retrieving the supported models.
         """
         raise NotImplementedError("Subclasses must implement this method.")
+
+    @staticmethod
+    def _build_messages(request: InferenceRequest) -> list[dict]:
+        """
+        Build the chat message list shared by all chat-based providers.
+
+        The order is: the system prompt (if any), then the context messages,
+        then the current user message. Roles are plain strings so they can be
+        serialized by any provider SDK.
+
+        :param request: The inference request to convert.
+        :type request: InferenceRequest
+        :return: A list of ``{"role": str, "content": str}`` dictionaries.
+        :rtype: list[dict]
+        """
+        messages = []
+
+        if request.system_prompt and request.system_prompt.strip():
+            messages.append(
+                {"role": Role.SYSTEM.value, "content": request.system_prompt}
+            )
+
+        for context_msg in request.context:
+            messages.append(
+                {"role": context_msg.role.value, "content": context_msg.content}
+            )
+
+        messages.append({"role": Role.USER.value, "content": request.message})
+        return messages

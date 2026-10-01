@@ -39,6 +39,30 @@ pip install "inference-client[dev]"
 pip install "inference-client[all]"
 ```
 
+## Usage
+
+### System prompt
+
+Pass `system_prompt` to steer the model's behaviour. Every provider sends it as
+the first message with the `system` role, before any context messages. Empty or
+whitespace-only values are ignored.
+
+```python
+from inference_client import InferenceClient, InferenceRequest
+
+client = InferenceClient.create_ollama_client(host="http://localhost:11434")
+request = InferenceRequest(
+    model="gemma3:12b",
+    message="What is the capital of France?",
+    system_prompt="Answer in one word.",
+)
+response = client.predict(request)
+```
+
+Support for the system role depends on the model's chat template. Older
+templates that reject it (e.g. early Mistral-Instruct or Gemma 2 on vLLM)
+raise an `InferenceRequestError`.
+
 ## Supported Providers
 
 ### Ollama
