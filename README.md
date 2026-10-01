@@ -6,7 +6,7 @@ A Python library that provides one unified API to call different inference provi
 
 - **Unified API**: Single interface for multiple inference providers
 - **Local & Cloud Support**: Work with both local models (Ollama) and cloud services (OpenAI, etc.)
-- **Chat-based Interactions**: Multi-turn conversation support with context management
+- **Chat-based Interactions**: Multi-turn conversation support with chat history management
 - **Robust Error Handling**: Comprehensive error handling with actionable feedback
 - **Type Safety**: Full type hints and validation
 - **Extensible**: Easy to add new inference providers
@@ -44,7 +44,7 @@ pip install "inference-client[all]"
 ### System prompt
 
 Pass `system_prompt` to steer the model's behaviour. Every provider sends it as
-the first message with the `system` role, before any context messages. Empty or
+the first message with the `system` role, before any chat history messages. Empty or
 whitespace-only values are ignored.
 
 ```python

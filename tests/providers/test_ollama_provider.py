@@ -5,7 +5,7 @@ import ollama
 import pytest
 
 from inference_client.base.types import (
-    ContextMessage,
+    ChatMessage,
     InferenceRequest,
     InferenceResponse,
     Role,
@@ -92,8 +92,8 @@ class TestOllamaProvider:
         )
 
     @patch("inference_client.providers.ollama.ollama_provider.Client")
-    def test_predict_with_context(self, mock_client_class):
-        """Test prediction with conversation context."""
+    def test_predict_with_chat_history(self, mock_client_class):
+        """Test prediction with chat history."""
         # Setup
         mock_client = Mock()
         mock_client_class.return_value = mock_client
@@ -106,11 +106,11 @@ class TestOllamaProvider:
         request = InferenceRequest(
             model="llama2:7b",
             message="What about Python?",
-            context=[
-                ContextMessage(
+            chat_history=[
+                ChatMessage(
                     role=Role.USER, content="What's a good programming language?"
                 ),
-                ContextMessage(
+                ChatMessage(
                     role=Role.ASSISTANT,
                     content="JavaScript is good for web development",
                 ),
@@ -150,9 +150,9 @@ class TestOllamaProvider:
         request = InferenceRequest(
             model="llama2:7b",
             message="And also explain generators",
-            context=[
-                ContextMessage(role=Role.USER, content="Explain Python decorators"),
-                ContextMessage(role=Role.USER, content="Actually, wait"),
+            chat_history=[
+                ChatMessage(role=Role.USER, content="Explain Python decorators"),
+                ChatMessage(role=Role.USER, content="Actually, wait"),
             ],
         )
 
@@ -186,10 +186,10 @@ class TestOllamaProvider:
         request = InferenceRequest(
             model="llama2:7b",
             message="Continue",
-            context=[
-                ContextMessage(role=Role.USER, content="Help me debug this"),
-                ContextMessage(role=Role.ASSISTANT, content="Let me check the code..."),
-                ContextMessage(role=Role.ASSISTANT, content="I found the issue!"),
+            chat_history=[
+                ChatMessage(role=Role.USER, content="Help me debug this"),
+                ChatMessage(role=Role.ASSISTANT, content="Let me check the code..."),
+                ChatMessage(role=Role.ASSISTANT, content="I found the issue!"),
             ],
         )
 
@@ -349,8 +349,8 @@ class TestOllamaProvider:
         )
 
     @patch("inference_client.providers.ollama.ollama_provider.Client")
-    def test_predict_with_images_and_context(self, mock_client_class):
-        """Test prediction with images and conversation context."""
+    def test_predict_with_images_and_chat_history(self, mock_client_class):
+        """Test prediction with images and chat history."""
         # Setup
         mock_client = Mock()
         mock_client_class.return_value = mock_client
@@ -363,9 +363,9 @@ class TestOllamaProvider:
         request = InferenceRequest(
             model="llava:7b",
             message="What about this image?",
-            context=[
-                ContextMessage(role=Role.USER, content="Can you analyze images?"),
-                ContextMessage(role=Role.ASSISTANT, content="Yes, I can!"),
+            chat_history=[
+                ChatMessage(role=Role.USER, content="Can you analyze images?"),
+                ChatMessage(role=Role.ASSISTANT, content="Yes, I can!"),
             ],
             images=[b"landscape_bytes"],
         )

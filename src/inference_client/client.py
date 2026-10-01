@@ -172,7 +172,7 @@ class InferenceClient:
     def predict(self, request: InferenceRequest) -> InferenceResponse:
         """
         Make a prediction using the configured inference provider.
-        The request only accepts text input and a context for now, but
+        The request only accepts text input and a chat history for now, but
         the response can contain both text and images.
 
         :param self: Description

@@ -1,7 +1,7 @@
 import pytest
 
 from inference_client.base.provider import BaseProvider
-from inference_client.base.types import ContextMessage, InferenceRequest, Role
+from inference_client.base.types import ChatMessage, InferenceRequest, Role
 
 
 class TestBuildMessages:
@@ -37,14 +37,14 @@ class TestBuildMessages:
             {"role": "user", "content": "Hello"}
         ]
 
-    def test_system_prompt_precedes_context(self):
-        """Test ordering: system prompt, then context, then current message."""
+    def test_system_prompt_precedes_chat_history(self):
+        """Test ordering: system prompt, then chat history, then current message."""
         request = InferenceRequest(
             model="m",
             message="And now?",
-            context=[
-                ContextMessage(role=Role.USER, content="Hi"),
-                ContextMessage(role=Role.ASSISTANT, content="Hello!"),
+            chat_history=[
+                ChatMessage(role=Role.USER, content="Hi"),
+                ChatMessage(role=Role.ASSISTANT, content="Hello!"),
             ],
             system_prompt="Be concise.",
         )
@@ -61,7 +61,7 @@ class TestBuildMessages:
         request = InferenceRequest(
             model="m",
             message="Hello",
-            context=[ContextMessage(role=Role.ASSISTANT, content="Hi")],
+            chat_history=[ChatMessage(role=Role.ASSISTANT, content="Hi")],
             system_prompt="Be concise.",
         )
 
@@ -70,10 +70,10 @@ class TestBuildMessages:
         assert all(type(role) is str for role in roles)
 
 
-class TestContextMessageRoles:
+class TestChatMessageRoles:
     """Tests that the system role is only settable through system_prompt."""
 
-    def test_system_role_rejected_in_context(self):
-        """Test that ContextMessage does not accept the system role."""
+    def test_system_role_rejected_in_chat_history(self):
+        """Test that ChatMessage does not accept the system role."""
         with pytest.raises(ValueError):
-            ContextMessage(role=Role.SYSTEM, content="Be concise.")
+            ChatMessage(role=Role.SYSTEM, content="Be concise.")

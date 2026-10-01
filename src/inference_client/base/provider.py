@@ -89,7 +89,7 @@ class BaseProvider:
         """
         Build the chat message list shared by all chat-based providers.
 
-        The order is: the system prompt (if any), then the context messages,
+        The order is: the system prompt (if any), then the chat history messages,
         then the current user message. Roles are plain strings so they can be
         serialized by any provider SDK.
 
@@ -105,9 +105,9 @@ class BaseProvider:
                 {"role": Role.SYSTEM.value, "content": request.system_prompt}
             )
 
-        for context_msg in request.context:
+        for history_msg in request.chat_history:
             messages.append(
-                {"role": context_msg.role.value, "content": context_msg.content}
+                {"role": history_msg.role.value, "content": history_msg.content}
             )
 
         messages.append({"role": Role.USER.value, "content": request.message})
